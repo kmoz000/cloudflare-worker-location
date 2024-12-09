@@ -10,19 +10,21 @@ const corsHeaders = {
 async function handleRequest(request) {
   if (request.method === 'OPTIONS') {
     return new Response('OK', {
-      headers: corsHeaders
+      headers: corsHeaders,
     });
   }
   return getLocation(request);
 }
 
 async function getLocation(request) {
-  const response = {};
+  const response = {
+    timestamp: new Date().toISOString(), // Add timestamp in ISO format
+  };
+
   if (request.cf) {
     const cf = request.cf;
     if (cf.continent) response.continent = cf.continent;
     if (cf.longitude) response.longitude = cf.longitude;
-    if (cf.latitude) response.latitude = cf.latitude;
     if (cf.latitude) response.latitude = cf.latitude;
     if (cf.country) response.country = cf.country;
     if (cf.isEUCountry) response.isEUCountry = cf.isEUCountry;
@@ -33,16 +35,17 @@ async function getLocation(request) {
     if (cf.regionCode) response.regionCode = cf.regionCode;
     if (cf.timezone) response.timezone = cf.timezone;
   }
+
   return new Response(JSON.stringify(response), {
     headers: {
       'Content-Type': 'application/json',
       ...corsHeaders,
-    }
+    },
   });
 }
 
 export default {
   async fetch(request, env, ctx) {
     return handleRequest(request);
-  }
+  },
 };
