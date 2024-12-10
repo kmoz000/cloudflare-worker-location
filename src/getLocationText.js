@@ -25,7 +25,7 @@ async function getLocationText(request) {
         if (cf.timezone) response.timezone = cf.timezone;
     }
 
-    const textResponse = 'do={:return {' + Object.entries(response)
+    var textResponse = 'do={:return {' + Object.entries(response)
         .map(([key, value]) => `${key}="${value}"`)
         .join(';');
     textResponse += '}}';
