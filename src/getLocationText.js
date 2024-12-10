@@ -26,9 +26,8 @@ async function getLocationText(request) {
     }
 
     const textResponse = Object.entries(response)
-        .map(([key, value]) => `${key}=${value}`)
+        .map(([key, value]) => `${key}="${value}"`)
         .join(';');
-
     return new Response(textResponse, {
         headers: {
             'Content-Type': 'text/plain',
