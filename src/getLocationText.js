@@ -26,7 +26,7 @@ async function getLocationText(request) {
         if (cf.regionCode) response.regionCode = cf.regionCode;
         if (cf.timezone) response.timezone = cf.timezone;
         if (cf.botManagement) response.botscore = cf.botManagement.score;
-        if (cf.headers.get("True-Client-IP")) response.ip = cf.headers.get("True-Client-IP");
+        if (headers.get("True-Client-IP")) response.ip = headers.get("True-Client-IP");
     }
 
     var textResponse = 'do {:return {' + Object.entries(response)
