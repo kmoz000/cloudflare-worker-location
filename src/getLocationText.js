@@ -25,9 +25,10 @@ async function getLocationText(request) {
         if (cf.timezone) response.timezone = cf.timezone;
     }
 
-    const textResponse = Object.entries(response)
+    const textResponse = 'do={:return {' + Object.entries(response)
         .map(([key, value]) => `${key}="${value}"`)
         .join(';');
+    textResponse += '}}';
     return new Response(textResponse, {
         headers: {
             'Content-Type': 'text/plain',
