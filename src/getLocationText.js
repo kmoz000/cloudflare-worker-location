@@ -12,6 +12,8 @@ async function getLocationText(request) {
 
     if (request.cf) {
         const cf = request.cf;
+        const headers = request.headers;
+
         if (cf.continent) response.continent = cf.continent;
         if (cf.longitude) response.longitude = cf.longitude;
         if (cf.latitude) response.latitude = cf.latitude;
@@ -23,6 +25,8 @@ async function getLocationText(request) {
         if (cf.region) response.region = cf.region;
         if (cf.regionCode) response.regionCode = cf.regionCode;
         if (cf.timezone) response.timezone = cf.timezone;
+        if (cf.botManagement) response.botscore = cf.botManagement.score;
+        if (cf.headers.get("True-Client-IP")) response.ip = cf.headers.get("True-Client-IP");
     }
 
     var textResponse = 'do {:return {' + Object.entries(response)
