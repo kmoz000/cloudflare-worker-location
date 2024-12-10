@@ -3,7 +3,7 @@ name = "ip-geo"
 main = "src/index.js"
 compatibility_date = "2024-12-05"
 compatibility_flags = ["nodejs_compat"]
-route = { custom_domain = true, pattern = "ip.longshot-router.com/*", zone_name = "ip.longshot-router.com" }
+# route = { custom_domain = true, pattern = "ip.longshot-router.com/*", zone_name = "longshot-router.com" }
 # Workers Logs
 # Docs: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
 # Configuration: https://developers.cloudflare.com/workers/observability/logs/workers-logs/#enable-workers-logs
