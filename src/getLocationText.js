@@ -26,7 +26,7 @@ async function getLocationText(request) {
     }
 
     var textResponse = 'do={:return {' + Object.entries(response)
-        .map(([key, value]) => `${key}="${value}"`)
+        .map(([key, value]) => `"${key}"="${value}"`)
         .join(';');
     textResponse += '}}';
     return new Response(textResponse, {
