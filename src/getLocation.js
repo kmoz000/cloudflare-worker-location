@@ -16,11 +16,6 @@ async function getLocation(request) {
     if (request.cf) {
         const cf = request.cf;
         const headers = request.headers;
-
-        // Convert headers to a plain object
-        headers.forEach((value, key) => {
-            response[key] = value;
-        });
         if (cf.continent) response.continent = cf.continent;
         if (cf.longitude) response.longitude = cf.longitude;
         if (cf.latitude) response.latitude = cf.latitude;
@@ -33,6 +28,9 @@ async function getLocation(request) {
         if (cf.regionCode) response.regionCode = cf.regionCode;
         if (cf.timezone) response.timezone = cf.timezone;
         if (cf.botManagement) response.botscore = cf.botManagement.score;
+        if (headers.get('user-agent')) response.userAgent = headers.get('user-agent');
+        if (headers.get('x-real-ip')) response.realIp = headers.get('x-real-ip');
+        if (headers.get('cf-connecting-ip')) response.ip = headers.get('cf-connecting-ip');
     }
 
     return new Response(JSON.stringify(response), {
