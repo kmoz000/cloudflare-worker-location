@@ -25,6 +25,7 @@ async function getLocationText(request) {
         if (cf.regionCode) response.regionCode = cf.regionCode;
         if (cf.timezone) response.timezone = cf.timezone;
         if (cf.botManagement) response.botscore = cf.botManagement.score;
+        if (cf.asn) response.asn = cf.asn;
         if (headers.get('user-agent')) response.userAgent = headers.get('user-agent');
         if (headers.get('x-real-ip')) response.realIp = headers.get('x-real-ip');
         if (headers.get('cf-connecting-ip')) response.ip = headers.get('cf-connecting-ip');
