@@ -7,15 +7,60 @@ const corsHeaders = {
     // This is URLs that are allowed to access the server. * is the wildcard character meaning any URL can.
     'Access-Control-Allow-Origin': '*',
 };
+function parseVCards(vcards) {
+    if (!Array.isArray(vcards)) {
+        console.warn("Invalid input: Expected an array of vCards. Returning an empty array.");
+        return [];
+    }
+
+    return vcards.map((vcard, index) => {
+        if (!Array.isArray(vcard) || vcard.length < 2) {
+            console.warn(`Invalid vCard format at index ${index}: Expected an array with at least two elements.`);
+            return { type: "invalid", details: null };
+        }
+
+        const [type, details] = vcard;
+        if (type !== "vcard" || !Array.isArray(details)) {
+            console.warn(`Invalid vCard structure at index ${index}: Missing or incorrect 'type' or 'details'.`);
+            return { type: "invalid", details: null };
+        }
+
+        const result = { type };
+
+        details.forEach((detail, detailIndex) => {
+            if (!Array.isArray(detail) || detail.length < 4) {
+                console.warn(
+                    `Invalid detail format at index ${index}, detail ${detailIndex}: Expected an array with four elements.`
+                );
+                return;
+            }
+
+            const [key, params, valueType, value] = detail;
+            if (!key || typeof value === "undefined") {
+                console.warn(
+                    `Missing 'key' or 'value' at index ${index}, detail ${detailIndex}. Skipping this detail.`
+                );
+                return;
+            }
+
+            if (key === "adr") {
+                result[key] = {
+                    label: params?.label || "Unknown address",
+                    details: Array.isArray(value) ? value : []
+                };
+            } else if (Array.isArray(value)) {
+                result[key] = value;
+            } else {
+                result[key] = value;
+            }
+        });
+
+        return result;
+    });
+}
 async function getAsnInfo(number) {
-    return await fetch("https://rdap-bootstrap.arin.net/bootstrap/autnum/" + number, {
-        method: 'GET', // or 'POST', 'PUT', etc.
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-        redirect: 'follow', // Allow redirects
-    }).then(response => response.json()).then(data => ({ asn: number, entities: (data?.entitie || []).length > 0 ? data.entities.map(s => s?.vcardArray) : [] })).catch(err => ({ asn: number, entities: [] }));
+    return await fetch("https://rdap-bootstrap.arin.net/bootstrap/autnum/" + number).then(response => response.json())
+        .then(data => ({ asn: number, entities: (data?.entities || []).length > 0 ? parseVCards(data.entities.map(s => s?.vcardArray)) : [] })).catch(err => ({ asn: number, entities: [] }));
 }
 async function getLocation(request) {
     const response = {
