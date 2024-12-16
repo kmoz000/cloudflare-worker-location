@@ -7,7 +7,16 @@ const corsHeaders = {
     // This is URLs that are allowed to access the server. * is the wildcard character meaning any URL can.
     'Access-Control-Allow-Origin': '*',
 };
-
+async function getAsnInfo(number) {
+    return await fetch("https://rdap-bootstrap.arin.net/bootstrap/autnum/" + number, {
+        method: 'GET', // or 'POST', 'PUT', etc.
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        redirect: 'follow', // Allow redirects
+    }).then(response => response.json()).then(data => ({ asn: number, entities: (data?.entitie || []).length > 0 ? data.entities.map(s => s?.vcardArray) : [] })).catch(err => ({ asn: number, entities: [] }));
+}
 async function getLocation(request) {
     const response = {
         timestamp: new Date().toISOString(), // Add timestamp in ISO format
@@ -27,7 +36,7 @@ async function getLocation(request) {
         if (cf.region) response.region = cf.region;
         if (cf.regionCode) response.regionCode = cf.regionCode;
         if (cf.timezone) response.timezone = cf.timezone;
-        if (cf.asn) response.asn = cf.asn;
+        if (cf.asn) response.asn = await getAsnInfo(cf.asn);
         if (cf.botManagement) response.botscore = cf.botManagement.score;
         if (headers.get('user-agent')) response.userAgent = headers.get('user-agent');
         if (headers.get('x-real-ip')) response.realIp = headers.get('x-real-ip');
