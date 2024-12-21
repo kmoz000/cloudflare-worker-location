@@ -62,32 +62,62 @@ async function getAsnInfo(number) {
     return await fetch("https://rdap-bootstrap.arin.net/bootstrap/autnum/" + number).then(response => response.json())
         .then(data => ({ asn: number, entities: (data?.entities || []).length > 0 ? parseVCards(data.entities.map(s => s?.vcardArray)) : [] })).catch(err => ({ asn: number, entities: [] }));
 }
+async function getIpInfo(ip) {
+    let asn_data = await fetch("https://rdap-bootstrap.arin.net/bootstrap/ip/" + ip).then(response => response.json()).catch(err => {
+        return { country: "Unknown", city: "Unknown", asn: "Unknown", entities: [] };
+    });
+    try {
+        return {
+            country: asn_data?.country || "Unknown",
+            asn: (asn_data?.entities || []).length > 0 ? parseVCards(asn_data.entities.map(s => s?.vcardArray)) :
+                []
+        };
+    } catch (error) {
+        return { country: "Unknown", asn: [] };
+    }
+}
 async function getLocation(request) {
     const response = {
         timestamp: new Date().toISOString(), // Add timestamp in ISO format
     };
-
-    if (request.cf) {
-        const cf = request.cf;
-        const headers = request.headers;
-        if (cf.continent) response.continent = cf.continent;
-        if (cf.longitude) response.longitude = cf.longitude;
-        if (cf.latitude) response.latitude = cf.latitude;
-        if (cf.country) response.country = cf.country;
-        if (cf.isEUCountry) response.isEUCountry = cf.isEUCountry;
-        if (cf.city) response.city = cf.city;
-        if (cf.postalCode) response.postalCode = cf.postalCode;
-        if (cf.metroCode) response.metroCode = cf.metroCode;
-        if (cf.region) response.region = cf.region;
-        if (cf.regionCode) response.regionCode = cf.regionCode;
-        if (cf.timezone) response.timezone = cf.timezone;
-        if (cf.asn) response.asn = await getAsnInfo(cf.asn);
-        if (cf.botManagement) response.botscore = cf.botManagement.score;
-        if (headers.get('user-agent')) response.userAgent = headers.get('user-agent');
-        if (headers.get('x-real-ip')) response.realIp = headers.get('x-real-ip');
-        if (headers.get('cf-connecting-ip')) response.ip = headers.get('cf-connecting-ip');
+    const { searchParams } = new URL(request.url);
+    const ip = searchParams.get('ip');
+    if (ip) {
+        response.ip = ip;
+        let ipInfo = await getIpInfo(ip);
+        response.country = ipInfo.country;
+        response.asn = ipInfo.asn;
+    } else {
+        if (request.cf) {
+            const cf = request.cf;
+            const headers = request.headers;
+            if (cf.continent) response.continent = cf.continent;
+            if (cf.longitude) response.longitude = cf.longitude;
+            if (cf.latitude) response.latitude = cf.latitude;
+            if (cf.country) response.country = cf.country;
+            if (cf.isEUCountry) response.isEUCountry = cf.isEUCountry;
+            if (cf.city) response.city = cf.city;
+            if (cf.postalCode) response.postalCode = cf.postalCode;
+            if (cf.metroCode) response.metroCode = cf.metroCode;
+            if (cf.region) response.region = cf.region;
+            if (cf.regionCode) response.regionCode = cf.regionCode;
+            if (cf.timezone) response.timezone = cf.timezone;
+            if (cf.asn) response.asn = await getAsnInfo(cf.asn);
+            if (cf.botManagement) response.botscore = cf.botManagement.score;
+            if (headers.get('user-agent')) response.userAgent = headers.get('user-agent');
+            if (headers.get('x-real-ip')) {
+                response.realIp = headers.get('x-real-ip')
+            } else {
+                response.realIp = "Unknown";
+            }
+            if (headers.get('cf-connecting-ip')) {
+                response.forwardedFor = headers.get('cf-connecting-ip');
+            } else {
+                response.forwardedFor = "Unknown";
+            }
+            response.realIp = headers.get('x-real-ip')
+        }
     }
-
     return new Response(JSON.stringify(response), {
         headers: {
             'Content-Type': 'application/json',
