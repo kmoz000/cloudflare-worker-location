@@ -1,11 +1,13 @@
-
 import Router from './router';
 import getLocationHandler from './getLocation';
 import getLocationTextHandler from './getLocationText';
 import up from './up';
 import down from './down';
+import frontPageHandler from './frontPage';
+
 async function handleRequest(request) {
 	const r = new Router();
+	r.get('.*/', frontPageHandler);
 	r.get('.*/ros', getLocationTextHandler);
 	r.get('.*/json', getLocationHandler);
 	r.get('.*/speed/down', down);

@@ -62,7 +62,7 @@ async function getAsnInfo(number) {
     return await fetch("https://rdap-bootstrap.arin.net/bootstrap/autnum/" + number).then(response => response.json())
         .then(data => ({ asn: number, entities: (data?.entities || []).length > 0 ? parseVCards(data.entities.map(s => s?.vcardArray)) : [] })).catch(err => ({ asn: number, entities: [] }));
 }
-async function getIpInfo(ip) {
+export async function getIpInfo(ip) {
     let asn_data = await fetch("https://rdap-bootstrap.arin.net/bootstrap/ip/" + ip).then(response => response.json()).catch(err => {
         return { country: "Unknown", city: "Unknown", asn: "Unknown", entities: [] };
     });
